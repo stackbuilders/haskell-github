@@ -46,7 +46,7 @@ data ContentItem = ContentItem {
 instance NFData ContentItem where rnf = genericRnf
 instance Binary ContentItem
 
-data ContentItemType = ItemFile | ItemDir
+data ContentItemType = ItemFile | ItemSymlink | ItemDir
   deriving (Show, Data, Typeable, Eq, Ord, Generic)
 
 instance NFData ContentItemType where rnf = genericRnf
@@ -149,9 +149,10 @@ instance FromJSON ContentItem where
 
 instance FromJSON ContentItemType where
   parseJSON = withText "ContentItemType" $ \t -> case T.toLower t of
-    "file" -> pure ItemFile
-    "dir"  -> pure ItemDir
-    _      -> fail $ "Unknown ContentItemType: " <> T.unpack t
+    "file"    -> pure ItemFile
+    "dir"     -> pure ItemDir
+    "symlink" -> pure ItemSymlink
+    _         -> fail $ "Unknown ContentItemType: " <> T.unpack t
 
 instance FromJSON ContentInfo where
   parseJSON = withObject "ContentInfo" $ \o ->

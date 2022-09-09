@@ -118,6 +118,8 @@ import GitHub.Data.Request
 
 import Paths_github (version)
 
+import Control.Monad.IO.Class (liftIO)
+
 -------------------------------------------------------------------------------
 -- Convenience
 -------------------------------------------------------------------------------
@@ -235,6 +237,7 @@ executeRequestWithMgrAndRes mgr auth req = runExceptT $ do
     performHttpReq :: forall rw mt b. ParseResponse mt b => HTTP.Request -> GenRequest mt rw b -> ExceptT Error IO (HTTP.Response b)
     performHttpReq httpReq Query {} = do
         res <- httpLbs' httpReq
+        liftIO $ LBS.writeFile "response.json" (HTTP.responseBody res)
         (<$ res) <$> unTagged (parseResponse httpReq res :: Tagged mt (ExceptT Error IO b))
 
     performHttpReq httpReq (PagedQuery _ _ l) =
